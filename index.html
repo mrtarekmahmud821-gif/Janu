@@ -3,7 +3,7 @@
 <head>  
     <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">  
-    <title>SHIB - Mining TWA</title>  
+    <title>PP COIN - Mining TWA</title>  
 
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>  
@@ -34,7 +34,7 @@
     
     <meta name="9349a9e3a3383f98889375dac0858ca23bfdef67" content="9349a9e3a3383f98889375dac0858ca23bfdef67" />
     <script src="https://ad.gigapub.tech/script?id=6390"></script>  
-    <script src="//libtl.com/sdk.js" data-zone="10373507" data-sdk="show_10373507"></script>  
+    <script src='//libtl.com/sdk.js' data-zone='10373507' data-sdk='show_10373507'></script>  
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>  
     <script src="https://adexora.com/cdn/ads.js?id=1884"></script>
 
@@ -42,7 +42,42 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="assets/css/style.css">
 
-    <!-- RichAds Push Notification -->
+    <style>  
+        body { 
+            background-color: #030712; 
+            color: #f3f4f6; 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }  
+        .glass { 
+            background: rgba(17, 24, 39, 0.7); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+        }  
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-blue { shadow: 0 0 25px rgba(59, 130, 246, 0.3); }
+        .nav-btn.active svg { fill: #3b82f6; filter: drop-shadow(0 0 8px rgba(59,130,246,0.6)); }  
+        .nav-btn.active span { color: #3b82f6; font-weight: 700; }  
+        
+        .drawer-up {
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .drawer-up.open {
+            transform: translateY(0%);
+        }
+
+        @keyframes pulse-glow { 0%, 100% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.08); opacity: 0.8; } }  
+        .animate-pulse-glow { animation: pulse-glow 3s infinite ease-in-out; }
+    </style>
+
+    <!-- RichAds Push Notification & SDK -->
     <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
     <script>
         window.TelegramAdsController = new TelegramAdsController();
@@ -65,6 +100,13 @@
                 setInterval(() => { showPushAd(); }, 30000);   
             }, 30000);       
         });
+
+        // Additional TG Ads Controller Initialization
+        window.tgAdsCtrl = new TelegramAdsController();
+        window.tgAdsCtrl.initialize({
+            pubId: "987925",
+            appId: "8316",
+        });
     </script>
 
     <meta name="bitmedia-site-verification" content="fad5daffd5b9702c0349933c1cce0bac" />
@@ -72,18 +114,24 @@
 
 <body class="max-w-md mx-auto min-h-screen pb-24 text-slate-200 relative overflow-x-hidden">  
 
-<!-- Modern App Fullscreen Loader -->
+<!-- Reward Toast Banner -->
+<div id="reward-toast-banner">
+    <span class="coin-icon">🪙</span>
+    <span id="toast-message">Reward Claimed!</span>
+</div>
+
+<!-- 🌟 Modern App Fullscreen Loader -->
 <div id="app-loader" class="fixed inset-0 z-[99999] bg-[#030712] flex flex-col items-center justify-center transition-opacity duration-500">
     <div class="relative flex items-center justify-center">
         <div class="w-24 h-24 rounded-full border-4 border-blue-500/20 border-t-blue-500 animate-spin"></div>
         <div class="absolute w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center border border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.5)]">
-            <span class="text-white font-black text-xs tracking-tighter">SHIB</span>
+            <span class="text-white font-black text-xs tracking-tighter">PP</span>
         </div>
     </div>
-    <p class="text-xs text-blue-400/80 font-semibold tracking-widest uppercase mt-6 animate-pulse">Loading SHIB App...</p>
+    <p class="text-xs text-blue-400/80 font-semibold tracking-widest uppercase mt-6 animate-pulse">Loading PP COIN...</p>
 </div>
 
-<!-- Page Switch Loader Overlay -->
+<!-- 🔄 Page Switch Loader Overlay -->
 <div id="page-loader" class="fixed inset-0 z-[90] bg-[#030712]/80 backdrop-blur-md hidden flex items-center justify-center">
     <div class="flex flex-col items-center">
         <div class="w-12 h-12 rounded-full border-3 border-blue-500/20 border-t-blue-500 animate-spin"></div>
@@ -91,12 +139,12 @@
     </div>
 </div>
 
-<!-- Header -->
+<!-- 🔝 Header -->
 <header class="p-4 flex justify-between items-center sticky top-0 z-50 glass rounded-b-2xl shadow-lg border-b border-white/5">  
     <div class="flex items-center gap-3">  
         <div id="user-photo-container" class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-full border border-blue-400/40 p-0.5 shadow-[0_0_10px_rgba(59,130,246,0.3)]">  
             <img id="user-photo" src="" class="w-full h-full object-cover rounded-full hidden" alt="User">  
-            <div id="user-placeholder" class="w-full h-full flex items-center justify-center text-white font-black text-xs">SHIB</div>  
+            <div id="user-placeholder" class="w-full h-full flex items-center justify-center text-white font-black text-xs">PP</div>  
         </div>  
         <div>  
             <div class="flex items-center gap-1.5">  
@@ -108,7 +156,7 @@
     </div>  
     <div class="text-right flex flex-col gap-0.5">  
         <div class="flex items-center justify-end gap-1 text-yellow-400 bg-yellow-500/10 px-2.5 py-1 rounded-full border border-yellow-500/20">  
-            <span id="pp-header" class="text-xs font-black">0.00</span> <span class="text-[9px] font-bold">SHIB</span>  
+            <span id="pp-header" class="text-xs font-black">0.00</span> <span class="text-[9px] font-bold">PP</span>  
         </div>  
         <div class="flex items-center justify-end gap-1 text-emerald-400 px-2.5 py-0.5">  
             <span id="usdt-header" class="text-xs font-extrabold">0.0000</span> <span class="text-[9px] font-bold">USDT</span>  
@@ -116,8 +164,10 @@
     </div>  
 </header>  
 
-<!-- HOME PAGE -->
+<!-- 🏠 HOME PAGE (MODERN MINING CARDS VIEW) -->
 <div id="page-home" class="page-content p-4 flex flex-col items-center">
+    
+    <!-- Floating Gift Hub Trigger Button -->
     <div class="w-full flex justify-between items-center mb-4">
         <div>
             <h1 class="text-lg font-black text-white uppercase tracking-tight">Active Miners</h1>
@@ -139,13 +189,16 @@
     </div>
 
     <!-- Dynamic Mining Cards List Container -->
-    <div id="mining-cards-container" class="w-full space-y-4 my-2"></div>
+    <div id="mining-cards-container" class="w-full space-y-4 my-2">
+        <!-- JS dynamically injects active mining cards here -->
+    </div>
+
 </div>
 
-<!-- TASKS PAGE -->
+<!-- 📑 TASKS PAGE -->
 <div id="page-task" class="page-content p-5 hidden">  
     <div class="flex justify-between items-center mb-6">  
-        <h2 class="text-xl font-black tracking-tight uppercase text-white">Earn USDT & SHIB</h2>  
+        <h2 class="text-xl font-black tracking-tight uppercase text-white">Earn USDT & PP</h2>  
         <button onclick="openModal('modal-adtask')" class="bg-blue-600 hover:bg-blue-500 px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg text-white transition-all">+ CREATE TASK</button>  
     </div>  
 
@@ -162,7 +215,7 @@
         <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-emerald-500">  
             <div>  
                 <p class="font-bold text-xs">Monetag Ads Task</p>  
-                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 SHIB</p>  
+                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 PP Coin</p>  
             </div>  
             <button id="btn-monetag" onclick="watchTaskAd('monetag')" class="bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">WATCH</button>  
         </div>  
@@ -170,7 +223,7 @@
         <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-emerald-500">  
             <div>  
                 <p class="font-bold text-xs">Adexium Ads Task</p>  
-                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 SHIB</p>  
+                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 PP Coin</p>  
             </div>  
             <button id="btn-adexium" onclick="watchTaskAd('adexium')" class="bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">WATCH</button>  
         </div>
@@ -178,7 +231,7 @@
         <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-emerald-500">  
             <div>  
                 <p class="font-bold text-xs">GigaPub Ads Task</p>  
-                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 SHIB</p>  
+                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 PP Coin</p>  
             </div>  
             <button id="btn-gigapub" onclick="watchTaskAd('gigapub')" class="bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">WATCH</button>  
         </div>  
@@ -186,7 +239,7 @@
         <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-emerald-500">  
             <div>  
                 <p class="font-bold text-xs">TadsAds Task</p>  
-                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 SHIB</p>  
+                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 PP Coin</p>  
             </div>  
             <button id="btn-tads" onclick="watchTaskAd('tads')" class="bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">WATCH</button>  
         </div>
@@ -196,8 +249,8 @@
 
             <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-teal-500">
                 <div>
-                    <p class="font-bold text-xs text-white">Visit & Earn SHIB</p>
-                    <p class="text-[10px] text-teal-400 font-semibold">REWARD: 50 SHIB</p>
+                    <p class="font-bold text-xs text-white">Visit & Earn PP Coin</p>
+                    <p class="text-[10px] text-teal-400 font-semibold">REWARD: 50 PP COIN</p>
                     <p id="webVisitTimer" class="text-[10px] text-slate-400 hidden"></p>
                 </div>
                 <button id="btn-web-visit" onclick="handleWebVisit()" class="bg-teal-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">VISIT</button>
@@ -205,8 +258,8 @@
 
             <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-teal-500">
                 <div>
-                    <p class="font-bold text-xs text-white">Visit & Earn SHIB 2</p>
-                    <p class="text-[10px] text-teal-400 font-semibold">REWARD: 50 SHIB</p>
+                    <p class="font-bold text-xs text-white">Visit & Earn PP Coin 2</p>
+                    <p class="text-[10px] text-teal-400 font-semibold">REWARD: 50 PP COIN</p>
                     <p id="webVisitTimer2" class="text-[10px] text-slate-400 hidden"></p>
                 </div>
                 <button id="btn-web-visit-2" onclick="handleWebVisit2()" class="bg-teal-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">VISIT</button>
@@ -215,7 +268,7 @@
             <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-violet-500">
                 <div>
                     <p class="font-bold text-xs text-white">AdsGram Web Task</p>
-                    <p class="text-[10px] text-violet-400 font-semibold">REWARD: 200 SHIB</p>
+                    <p class="text-[10px] text-violet-400 font-semibold">REWARD: 200 PP COIN</p>
                     <p id="adsGramLoadingTimer" class="text-[10px] text-blue-400 hidden"></p>
                 </div>
                 <adsgram-task data-block-id="task-30650" data-debug="false" id="adsgram-task-component" style="display: block; background: #8b5cf6; color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;"></adsgram-task>
@@ -224,7 +277,7 @@
             <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-amber-500">
                 <div>
                     <p class="font-bold text-xs text-white">Tads Sponsored Task</p>
-                    <p class="text-[10px] text-amber-400 font-semibold">REWARD: 200 SHIB</p>
+                    <p class="text-[10px] text-amber-400 font-semibold">REWARD: 200 PP COIN</p>
                 </div>
                 <div id="tads-container-10891"></div>
             </div>
@@ -242,7 +295,7 @@
                 <div class="w-10 h-10 bg-indigo-600/20 rounded-xl flex items-center justify-center border border-indigo-500/30 text-xl">📋</div>
                 <div>
                     <h4 class="text-white font-bold text-xs">GigaPub Offerwall</h4>
-                    <p class="text-[10px] text-indigo-400 font-medium">REWARD: 100 - 500+ SHIB</p>
+                    <p class="text-[10px] text-indigo-400 font-medium">REWARD: 100 - 500+ PP Coin</p>
                 </div>
             </div>
             <button onclick="openGigaOfferwall()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all">OPEN</button>
@@ -250,14 +303,14 @@
     </div>
 </div>
 
-<!-- REFERRAL PAGE -->
+<!-- 👥 REFERRAL PAGE -->
 <div id="page-refer" class="page-content p-5 hidden">  
     <h2 class="text-xl font-black tracking-tight uppercase mb-4 text-white">Referral Program</h2>  
     <div class="glass-card p-5 rounded-2xl mb-5 text-center relative overflow-hidden">  
         <p class="text-xs text-slate-300 mb-4 whitespace-pre-line leading-relaxed">
 🎁 <b>Referral Reward:</b>
 <span class="text-lg font-black text-amber-400 block my-1">⚡ 1x Free Mining Card (48 Hours)</span>
-Earn 200 SHIB every 15 mins automatically!
+Earn 200 PP every 15 mins automatically!
         </p>
         <div class="flex gap-2">
             <input id="ref-link" type="text" readonly value="" class="bg-black/60 border border-slate-700 w-full p-3 rounded-xl text-[10px] font-mono outline-none text-slate-300">
@@ -281,7 +334,7 @@ Earn 200 SHIB every 15 mins automatically!
     <div class="glass rounded-2xl overflow-hidden" id="leaderboard-list"></div>  
 </div>  
 
-<!-- PROFILE PAGE -->
+<!-- 👤 PROFILE PAGE (WITH DEPOSIT & WITHDRAW TOGGLE TABS) -->
 <div id="page-profile" class="page-content p-5 hidden">  
     <h2 class="text-xl font-black tracking-tight uppercase mb-4 text-white">My Profile & Wallet</h2>  
     
@@ -299,17 +352,17 @@ Earn 200 SHIB every 15 mins automatically!
         </div>  
     </div>  
 
-    <!-- Sub-Tab Switches -->
+    <!-- Sub-Tab Switches (Deposit vs Withdraw) -->
     <div class="grid grid-cols-2 gap-2 bg-slate-900/80 p-1 rounded-2xl border border-white/5 mb-5">
         <button id="tab-btn-deposit" onclick="switchProfileTab('deposit')" class="py-2.5 rounded-xl font-bold text-xs uppercase transition-all bg-blue-600 text-white shadow-md">
             Deposit USDT
         </button>
         <button id="tab-btn-withdraw" onclick="switchProfileTab('withdraw')" class="py-2.5 rounded-xl font-bold text-xs uppercase transition-all text-slate-400 hover:text-white">
-            Withdraw SHIB
+            Withdraw PP
         </button>
     </div>
 
-    <!-- SUB-VIEW 1: DEPOSIT SECTION -->
+    <!-- 🟢 SUB-VIEW 1: DEPOSIT SECTION -->
     <div id="profile-deposit-view" class="space-y-4">
         <div class="glass p-5 rounded-2xl border border-emerald-500/30">  
             <h3 class="text-sm font-bold text-emerald-400 uppercase text-center mb-3">Deposit USDT via Binance Pay</h3>  
@@ -338,14 +391,14 @@ Earn 200 SHIB every 15 mins automatically!
         </div>
     </div>
 
-    <!-- SUB-VIEW 2: WITHDRAW SECTION -->
+    <!-- 🔴 SUB-VIEW 2: WITHDRAW SECTION -->
     <div id="profile-withdraw-view" class="space-y-5 hidden">
         <div class="glass p-5 rounded-2xl border border-blue-500/20">  
-            <label class="text-[9px] text-slate-400 font-bold mb-3 block uppercase tracking-widest">Select Amount (SHIB)</label>  
+            <label class="text-[9px] text-slate-400 font-bold mb-3 block uppercase tracking-widest">Select Amount (PP)</label>  
             
             <div id="withdraw-options" class="grid grid-cols-2 gap-3 mb-4">
-                <button onclick="selectWithdraw(10000, this)" class="w-btn bg-white/5 py-3 rounded-xl border border-white/10 text-xs font-bold transition-all text-white">10,000 SHIB</button>    
-                <button onclick="selectWithdraw(20000, this)" class="w-btn bg-white/5 py-3 rounded-xl border border-white/10 text-xs font-bold transition-all text-white">20,000 SHIB</button>  
+                <button onclick="selectWithdraw(10000, this)" class="w-btn bg-white/5 py-3 rounded-xl border border-white/10 text-xs font-bold transition-all text-white">10,000 PP</button>    
+                <button onclick="selectWithdraw(20000, this)" class="w-btn bg-white/5 py-3 rounded-xl border border-white/10 text-xs font-bold transition-all text-white">20,000 PP</button>  
             </div>  
 
             <label class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-1">Binance Pay UID</label>  
@@ -365,7 +418,7 @@ Earn 200 SHIB every 15 mins automatically!
     </div>
 </div>
 
-<!-- MINER STORE & REWARDS HUB MODAL -->
+<!-- 🎁 MINER STORE & REWARDS HUB MODAL -->
 <div id="modal-gift-hub" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-end justify-center backdrop-blur-sm transition-opacity">
     <div class="drawer-up glass w-full max-w-md rounded-t-[2.5rem] p-6 border-t border-amber-500/30 max-h-[85vh] overflow-y-auto" id="gift-hub-content">
         <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4"></div>
@@ -396,10 +449,10 @@ Earn 200 SHIB every 15 mins automatically!
                         <div class="w-10 h-10 bg-blue-600/20 rounded-xl flex items-center justify-center text-xl">⛏️</div>
                         <div>
                             <h4 class="font-bold text-xs text-white">Miner #1 (Starter)</h4>
-                            <p class="text-[9px] text-blue-400">Validity: 48 Hours | 200 SHIB / 15 Min</p>
+                            <p class="text-[9px] text-blue-400">Validity: 48 Hours | 200 PP / 15 Min</p>
                         </div>
                     </div>
-                    <span class="text-[9px] font-bold bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-500/40">Total 38,400 SHIB</span>
+                    <span class="text-[9px] font-bold bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-500/40">Total 38,400 PP</span>
                 </div>
                 <p class="text-[9px] text-slate-400">Yield Value: <b>~0.22 USDT</b> total return.</p>
                 <button onclick="buyUpgrade('miner_1')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2.5 rounded-xl uppercase shadow-md">Buy Miner #1 - $0.12 USDT</button>
@@ -412,10 +465,10 @@ Earn 200 SHIB every 15 mins automatically!
                         <div class="w-10 h-10 bg-emerald-600/20 rounded-xl flex items-center justify-center text-xl">⚡</div>
                         <div>
                             <h4 class="font-bold text-xs text-white">Miner #2 (Pro)</h4>
-                            <p class="text-[9px] text-emerald-400">Validity: 72 Hours | 200 SHIB / 15 Min</p>
+                            <p class="text-[9px] text-emerald-400">Validity: 72 Hours | 200 PP / 15 Min</p>
                         </div>
                     </div>
-                    <span class="text-[9px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/40">Total 57,600 SHIB</span>
+                    <span class="text-[9px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/40">Total 57,600 PP</span>
                 </div>
                 <p class="text-[9px] text-slate-400">Yield Value: <b>~0.30 USDT</b> total return.</p>
                 <button onclick="buyUpgrade('miner_2')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl uppercase shadow-md">Buy Miner #2 - $0.15 USDT</button>
@@ -428,10 +481,10 @@ Earn 200 SHIB every 15 mins automatically!
                         <div class="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center text-xl">🚀</div>
                         <div>
                             <h4 class="font-bold text-xs text-white">Miner #3 (VIP Ultra)</h4>
-                            <p class="text-[9px] text-amber-400">Validity: 72 Hours | 250 SHIB / 15 Min</p>
+                            <p class="text-[9px] text-amber-400">Validity: 72 Hours | 250 PP / 15 Min</p>
                         </div>
                     </div>
-                    <span class="text-[9px] font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/40">Total 72,000 SHIB</span>
+                    <span class="text-[9px] font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/40">Total 72,000 PP</span>
                 </div>
                 <p class="text-[9px] text-slate-400">Yield Value: <b>~0.40 USDT</b> total return.</p>
                 <button onclick="buyUpgrade('miner_3')" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 rounded-xl uppercase shadow-md">Buy Miner #3 - $0.20 USDT</button>
@@ -440,7 +493,7 @@ Earn 200 SHIB every 15 mins automatically!
     </div>
 </div>
 
-<!-- MODALS & POPUPS -->
+<!-- 📦 MODALS & POPUPS -->
 
 <!-- Ad Task Create Modal -->
 <div id="modal-adtask" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm">  
@@ -535,7 +588,7 @@ Earn 200 SHIB every 15 mins automatically!
     </div>
 </div>
 
-<!-- BOTTOM NAVIGATION BAR -->
+<!-- ⚓ BOTTOM NAVIGATION BAR -->
 <nav class="fixed bottom-0 left-0 right-0 glass h-20 flex justify-around items-center px-4 rounded-t-3xl border-t border-white/10 z-[60]">  
     <button onclick="switchTab('home')" id="nav-home" class="nav-btn active flex flex-col items-center gap-1">  
         <svg viewBox="0 0 24 24" class="w-6 h-6 fill-slate-400"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>  
@@ -569,6 +622,137 @@ Earn 200 SHIB every 15 mins automatically!
 <script type="module" src="./assets/js/deposit.js"></script>
 <script type="module" src="assets/js/webvisit.js"></script>
 <script src="assets/js/app-navigation.js"></script>
+<!-- ⚡ CORE APP NAVIGATION JS -->
+<script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.expand();
+        tg.ready();
+        tg.enableClosingConfirmation();
+    }
+
+    let activeTab = 'home';
+    let navigationHistory = ['home'];
+
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const loader = document.getElementById('app-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }
+        }, 1000);
+    });
+
+    if (tg && tg.BackButton) {
+        tg.BackButton.onClick(() => {
+            if (navigationHistory.length > 1) {
+                navigationHistory.pop();
+                const lastTab = navigationHistory[navigationHistory.length - 1];
+                switchTab(lastTab, false);
+            } else {
+                tg.BackButton.hide();
+            }
+        });
+    }
+
+    function switchTab(tabName, pushHistory = true) {
+        if (activeTab === tabName) return;
+
+        const pageLoader = document.getElementById('page-loader');
+        if (pageLoader) pageLoader.classList.remove('hidden');
+
+        setTimeout(() => {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+            const targetPage = document.getElementById(`page-${tabName}`);
+            const targetNav = document.getElementById(`nav-${tabName}`);
+
+            if (targetPage) targetPage.classList.remove('hidden');
+            if (targetNav) targetNav.classList.add('active');
+
+            activeTab = tabName;
+
+            if (pushHistory && navigationHistory[navigationHistory.length - 1] !== tabName) {
+                navigationHistory.push(tabName);
+            }
+
+            if (tg && tg.BackButton) {
+                if (navigationHistory.length > 1) {
+                    tg.BackButton.show();
+                } else {
+                    tg.BackButton.hide();
+                }
+            }
+
+            if (pageLoader) pageLoader.classList.add('hidden');
+        }, 200);
+    }
+
+    function switchProfileTab(subTab) {
+        const depView = document.getElementById('profile-deposit-view');
+        const withView = document.getElementById('profile-withdraw-view');
+        const depBtn = document.getElementById('tab-btn-deposit');
+        const withBtn = document.getElementById('tab-btn-withdraw');
+
+        if (subTab === 'deposit') {
+            depView.classList.remove('hidden');
+            withView.classList.add('hidden');
+            depBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase transition-all bg-emerald-600 text-white shadow-md";
+            withBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase transition-all text-slate-400 hover:text-white";
+        } else {
+            depView.classList.add('hidden');
+            withView.classList.remove('hidden');
+            withBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase transition-all bg-blue-600 text-white shadow-md";
+            depBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase transition-all text-slate-400 hover:text-white";
+        }
+    }
+
+    function openGiftHub() {
+        const modal = document.getElementById('modal-gift-hub');
+        const drawer = document.getElementById('gift-hub-content');
+        modal.classList.remove('hidden');
+        setTimeout(() => drawer.classList.add('open'), 10);
+        if (tg && tg.BackButton) tg.BackButton.show();
+    }
+
+    function closeGiftHub() {
+        const modal = document.getElementById('modal-gift-hub');
+        const drawer = document.getElementById('gift-hub-content');
+        drawer.classList.remove('open');
+        setTimeout(() => modal.classList.add('hidden'), 350);
+        if (navigationHistory.length <= 1 && tg && tg.BackButton) {
+            tg.BackButton.hide();
+        }
+    }
+
+    function copyBotUsername() {
+        const botText = document.getElementById("bot-username").innerText;
+        navigator.clipboard.writeText(botText).then(() => alert("Bot username copied: " + botText));
+    }
+
+    function closeModal(id) {
+        document.getElementById(id)?.classList.add('hidden');
+    }
+
+    function openModal(id) {
+        document.getElementById(id)?.classList.remove('hidden');
+    }
+</script>
+
+<script>
+    setTimeout(() => {
+        function triggerAdsgramAd() {
+            if (window.Adsgram) {
+                const AdController = window.Adsgram.init({ blockId: "int-44160" });
+                AdController.show().catch(err => console.log("Adsgram Error:", err));
+            }
+        }
+        triggerAdsgramAd();
+        setInterval(triggerAdsgramAd, 240000); 
+    }, 30000); 
+</script>
 
 </body>  
-  </html>
+    </html>

@@ -1,73 +1,50 @@
-// ==========================================
-// File: home.js
-// Description: হোম পেজ, মাইনিং ইঞ্জিন এবং SHIB রিওয়ার্ড ক্লেম সিস্টেম
-// ==========================================
+// =======================================================
+// home.js - Mining Cards Engine + Claim Reward
+// =======================================================
 
-// --- মাইনিং কার্ড অবজেক্ট জেনারেটর ---
-function createCardObject(type, durationHours, rewardPerCycle, usdtValue, title) {
-    const now = Date.now();
-    const totalCycles = (durationHours * 60) / 15;
-    const totalCoins = totalCycles * rewardPerCycle;
-    return {
-        id: 'card_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
-        type: type,
-        title: title || 'Mining Card',
-        durationHours: durationHours,
-        rewardPerCycle: rewardPerCycle,
-        usdtValue: usdtValue,
-        totalCoins: totalCoins,
-        createdAt: now,
-        expiresAt: now + (durationHours * 60 * 60 * 1000),
-        lastClaimTime: now,
-        cooldownUntil: 0
-    };
-}
-window.createCardObject = createCardObject;
-
-let miningRenderInterval = null;
-
-// --- মাইনিং কার্ড ইঞ্জিন ---
+// মাইনিং কার্ড রেন্ডার ইঞ্জিন চালু করা
 function startMiningCardEngine() {
-    if (miningRenderInterval) clearInterval(miningRenderInterval);
+    if (window.miningRenderInterval) clearInterval(window.miningRenderInterval);
     renderMiningCards();
-    miningRenderInterval = setInterval(() => {
+    window.miningRenderInterval = setInterval(() => {
         renderMiningCards();
     }, 1000);
 }
 window.startMiningCardEngine = startMiningCardEngine;
 
+// মাইনিং কার্ডগুলো স্ক্রিনে দেখানো
 function renderMiningCards() {
     const container = document.getElementById('mining-cards-container');
-    if (!container) return;
-
-    const currentUser = window.currentUser;
-    const db = window.db;
-    const doc = window.doc;
-    const updateDoc = window.updateDoc;
+    if (!container || !window.currentUser) return;
 
     const now = Date.now();
-    let cards = currentUser.miningCards || [];
+    let cards = window.currentUser.miningCards || [];
     const activeCards = cards.filter(card => now < card.expiresAt);
 
+    // মেয়াদ শেষ হওয়া কার্ড পরিষ্কার + প্রিমিয়াম স্ট্যাটাস রাখা
     if (activeCards.length !== cards.length) {
         const hadBoughtMiner = cards.some(c => c.type !== 'free' && c.type !== 'referral');
-        currentUser.miningCards = activeCards;
+        window.currentUser.miningCards = activeCards;
+
         let updateObj = { miningCards: activeCards };
         if (hadBoughtMiner) {
-            currentUser.hasPremiumMiner = true;
-            currentUser.isWithdrawUnlocked = true;
+            window.currentUser.hasPremiumMiner = true;
+            window.currentUser.isWithdrawUnlocked = true;
             updateObj.hasPremiumMiner = true;
             updateObj.isWithdrawUnlocked = true;
         }
-        updateDoc(doc(db, "users", currentUser.id), updateObj);
+
+        if (window.db && window.currentUser.id) {
+            updateDoc(doc(window.db, "users", window.currentUser.id), updateObj).catch(e => console.error(e));
+        }
     }
 
     if (activeCards.length === 0) {
         container.innerHTML = `
             <div class="glass p-6 rounded-2xl text-center border border-white/10">
                 <p class="text-sm font-bold text-slate-300">NO ACTIVE MINING CARD!</p>
-                <p class="text-[10px] text-slate-400 mt-1">Buy A New Miner From The Store</p>
-                <button onclick="openGiftHub()" class="mt-3 bg-blue-600 px-4 py-2 rounded-xl text-xs font-bold text-white">UPGRADE</button>
+                <p class="text-[10px] text-slate-400 mt-1">Buy a new miner from the store</p>
+                <button onclick="openGiftHub()" class="mt-3 bg-[#F7931A] px-4 py-2 rounded-xl text-xs font-bold text-white">UPGRADE</button>
             </div>`;
         return;
     }
@@ -95,11 +72,11 @@ function renderMiningCards() {
             const cdSec = cooldownSec % 60;
             btnStateHtml = `
                 <button disabled class="w-full bg-slate-800 text-slate-400 py-3 rounded-xl font-bold text-xs uppercase cursor-not-allowed">
-                    🕒 Cooldown (${cdMin}:${cdSec < 10 ? '0' : ''}${cdSec})
+                    Cooldown (\( {cdMin}: \){cdSec < 10 ? '0' : ''}${cdSec})
                 </button>`;
         } else if (isCycleComplete) {
             btnStateHtml = `
-                <button onclick="claimCardReward('${card.id}')" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 py-3 rounded-xl font-black text-xs uppercase text-white shadow-lg shadow-emerald-600/30 animate-pulse">
+                <button onclick="claimCardReward('${card.id}')" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 py-3 rounded-xl font-black text-xs uppercase text-white shadow-lg animate-pulse">
                     CLAIM ${card.rewardPerCycle} SHIB
                 </button>`;
         } else {
@@ -107,162 +84,139 @@ function renderMiningCards() {
             const cMin = Math.floor(remainingCycleSec / 60);
             const cSec = remainingCycleSec % 60;
             btnStateHtml = `
-                <button disabled class="w-full bg-blue-900/40 border border-blue-500/30 text-blue-300 py-3 rounded-xl font-bold text-xs uppercase cursor-not-allowed flex items-center justify-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
-                    MINING (${cMin}:${cSec < 10 ? '0' : ''}${cSec})
+                <button disabled class="w-full bg-[#F7931A]/20 border border-[#F7931A]/40 text-[#F7931A] py-3 rounded-xl font-bold text-xs uppercase cursor-not-allowed flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#F7931A] animate-ping"></span>
+                    MINING (\( {cMin}: \){cSec < 10 ? '0' : ''}${cSec})
                 </button>`;
         }
 
         html += `
-            <div class="glass-card p-4 rounded-2xl border border-blue-500/30 relative overflow-hidden mb-4 shadow-xl">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl">⚡</span>
-                        <div>
-                            <h4 class="font-black text-xs text-white uppercase">${card.title}</h4>
-                            <p class="text-[9px] text-blue-400 font-bold">${card.durationHours}H Card • Total: ${card.totalCoins.toLocaleString()} SHIB (~$${card.usdtValue} USDT)</p>
-                        </div>
-                    </div>
-                    <span class="bg-blue-600/20 text-blue-400 text-[9px] font-black px-2.5 py-1 rounded-full border border-blue-500/30">
-                        ⏳ ${hoursLeft}h ${minsLeft}m Left
-                    </span>
+        <div class="glass p-4 rounded-2xl border border-white/10 space-y-3">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h4 class="font-bold text-sm text-white">${card.title || 'Mining Card'}</h4>
+                    <p class="text-[10px] text-[#F7931A]">${card.rewardPerCycle} SHIB / 15 min</p>
                 </div>
-
-                <div class="my-3 bg-black/40 p-3 rounded-xl border border-white/5">
-                    <div class="flex justify-between items-center text-[10px] font-bold mb-1">
-                        <span class="text-slate-400 uppercase">15-Min Progress</span>
-                        <span class="text-emerald-400">${currentMinedCoins} / ${card.rewardPerCycle} SHIB</span>
-                    </div>
-                    <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
-                        <div class="bg-gradient-to-r from-blue-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: ${cycleProgress * 100}%"></div>
-                    </div>
-                </div>
-
-                ${btnStateHtml}
-            </div>`;
+                <span class="text-[9px] bg-white/5 px-2 py-1 rounded-full text-zinc-300">${hoursLeft}h ${minsLeft}m left</span>
+            </div>
+            
+            <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#F7931A] to-[#FFB347] transition-all duration-1000" style="width: ${cycleProgress * 100}%"></div>
+            </div>
+            
+            <div class="flex justify-between text-[10px] text-zinc-400">
+                <span>Mined: ${currentMinedCoins} SHIB</span>
+                <span>Total: ${card.totalCoins || 0} SHIB</span>
+            </div>
+            
+            ${btnStateHtml}
+        </div>`;
     });
 
     container.innerHTML = html;
 }
+window.renderMiningCards = renderMiningCards;
 
-// --- কার্ড রিওয়ার্ড ক্লেম ---
-window.claimCardReward = (cardId) => {
-    const currentUser = window.currentUser;
-    const db = window.db;
-    const doc = window.doc;
-    const updateDoc = window.updateDoc;
-    const increment = window.increment;
+// কার্ড থেকে রিওয়ার্ড ক্লেইম করা
+async function claimCardReward(cardId) {
+    if (!window.currentUser || !window.db) return;
 
-    const card = (currentUser.miningCards || []).find(c => c.id === cardId);
-    if (!card) return;
+    const cards = window.currentUser.miningCards || [];
+    const cardIndex = cards.findIndex(c => c.id === cardId);
+    if (cardIndex === -1) return;
 
-    if (!window.Adsgram) {
-        window.showToast("Ad SDK not loaded. Try again!", "error");
+    const card = cards[cardIndex];
+    const now = Date.now();
+    const cycleMs = 15 * 60 * 1000;
+
+    if (now - card.lastClaimTime < cycleMs) {
+        window.showTopToast("Mining cycle not completed yet!", "error");
         return;
     }
 
-    const AdController = window.Adsgram.init({ blockId: "19955" });
+    try {
+        const reward = Number(card.rewardPerCycle) || 200;
+        const userRef = doc(window.db, "users", window.currentUser.id);
 
-    AdController.show().then(async (result) => {
-        if (result.done) {
-            try {
-                const now = Date.now();
-                const reward = card.rewardPerCycle;
-                card.lastClaimTime = now;
+        // কার্ড আপডেট
+        cards[cardIndex].lastClaimTime = now;
+        cards[cardIndex].cooldownUntil = now + (60 * 1000); // ১ মিনিট কুলডাউন
 
-                const cooldownDuration = 3 * 60 * 1000;
-                currentUser.miningCards.forEach(c => {
-                    if (c.id !== cardId) {
-                        c.cooldownUntil = now + cooldownDuration;
-                    }
-                });
+        await updateDoc(userRef, {
+            pp: increment(reward),
+            miningCards: cards
+        });
 
-                const userRef = doc(db, "users", currentUser.id);
-                await updateDoc(userRef, { 
-                    shib: increment(reward),
-                    miningCards: currentUser.miningCards
-                });
+        window.currentUser.pp = (Number(window.currentUser.pp) || 0) + reward;
+        window.currentUser.miningCards = cards;
 
-                currentUser.shib = (currentUser.shib || 0) + reward;
-                window.updateUI();
-                renderMiningCards();
+        if (typeof window.updateUI === 'function') window.updateUI();
+        renderMiningCards();
 
-                if (window.tg?.HapticFeedback) window.tg.HapticFeedback.notificationOccurred('success');
-                window.showToast(`🎉 Claimed ${reward} SHIB!`, "success");
+        window.triggerHaptic('notification', 'success');
+        window.showTopToast(`+${reward} SHIB claimed successfully!`, "success");
 
-            } catch (error) {
-                console.error("Claim Error:", error);
-                window.showToast("Database error!", "error");
-            }
-        } else {
-            window.showToast("Watch the full ad to claim!", "error");
-        }
-    }).catch(() => {
-        window.showToast("Ads not available right now.", "error");
-    });
-};
+    } catch (e) {
+        console.error("Claim Error:", e);
+        window.showTopToast("Claim failed. Please try again.", "error");
+    }
+}
+window.claimCardReward = claimCardReward;
 
-// --- ম্যানুয়াল মাইনিং রিওয়ার্ড ক্লেম ---
-window.claimReward = () => {
-    const currentUser = window.currentUser;
-    const db = window.db;
-    const doc = window.doc;
-    const updateDoc = window.updateDoc;
-    const increment = window.increment;
+// পুরনো মাইনিং চেক (যদি থাকে)
+function checkExistingMining() {
+    // বর্তমানে কার্ড সিস্টেম ব্যবহার করা হচ্ছে
+    renderMiningCards();
+}
+window.checkExistingMining = checkExistingMining;
 
-    const claimBtn = document.getElementById('btn-claim');
-    if (!claimBtn) return;
-    if (!window.Adsgram) {
-        window.showToast("Ad SDK not loaded yet. Please try again!", "error");
+// মাইনার কিনা
+async function buyUpgrade(minerType) {
+    if (!window.currentUser || !window.db) return;
+
+    const plans = {
+        miner_1: { hours: 48, reward: 200, usdt: 0.12, title: 'Miner #1 (Starter)' },
+        miner_2: { hours: 72, reward: 200, usdt: 0.15, title: 'Miner #2 (Pro)' },
+        miner_3: { hours: 72, reward: 250, usdt: 0.20, title: 'Miner #3 (VIP Ultra)' }
+    };
+
+    const plan = plans[minerType];
+    if (!plan) return;
+
+    if (Number(window.currentUser.usdt || 0) < plan.usdt) {
+        window.showTopToast("Insufficient USDT balance!", "error");
         return;
     }
 
-    claimBtn.disabled = true;
-    claimBtn.innerText = "Ads Loading...";
+    try {
+        const userRef = doc(window.db, "users", window.currentUser.id);
+        const newCard = window.createCardObject('premium', plan.hours, plan.reward, plan.usdt, plan.title);
 
-    const AdController = window.Adsgram.init({ blockId: "19955" });
-    AdController.show().then(async (result) => {
-        if (result.done) {
-            try {
-                const rewardAmount = 200;
-                const userRef = doc(db, "users", currentUser.id);
-                await updateDoc(userRef, { 
-                    shib: increment(rewardAmount), 
-                    miningStartTime: 0 
-                });
+        const existingCards = window.currentUser.miningCards || [];
+        existingCards.push(newCard);
 
-                currentUser.shib = (currentUser.shib || 0) + rewardAmount;
-                currentUser.miningStartTime = 0;
+        await updateDoc(userRef, {
+            usdt: increment(-plan.usdt),
+            miningCards: existingCards,
+            hasPremiumMiner: true,
+            isWithdrawUnlocked: true
+        });
 
-                const startBtn = document.getElementById('btn-start');
-                const counter = document.getElementById('local-counter');
-                const statusText = document.getElementById('mining-status');
+        window.currentUser.usdt = (Number(window.currentUser.usdt) || 0) - plan.usdt;
+        window.currentUser.miningCards = existingCards;
+        window.currentUser.hasPremiumMiner = true;
+        window.currentUser.isWithdrawUnlocked = true;
 
-                if (claimBtn) claimBtn.classList.add('hidden');
-                if (startBtn) startBtn.classList.remove('hidden');
-                if (counter) counter.innerText = "0";
-                if (statusText) statusText.innerText = "OFFLINE";
+        if (typeof window.updateUI === 'function') window.updateUI();
+        renderMiningCards();
+        closeGiftHub();
 
-                window.updateUI();
-                if (window.tg?.HapticFeedback) window.tg.HapticFeedback.notificationOccurred('success');
-                window.showToast(`🎉 Success! You earned ${rewardAmount} SHIB.`, "success");
+        window.showTopToast(`${plan.title} activated successfully!`, "success");
+        window.triggerHaptic('notification', 'success');
 
-            } catch (error) {
-                console.error("Reward Error:", error);
-                window.showToast("Database error! Please try again.", "error");
-            } finally {
-                claimBtn.disabled = false;
-                claimBtn.innerText = "CLAIM REWARDS";
-            }
-        } else {
-            window.showToast("You must watch the full ad to claim rewards!", "error");
-            claimBtn.disabled = false;
-            claimBtn.innerText = "CLAIM REWARDS";
-        }
-    }).catch((err) => {
-        console.error("Adsgram Error:", err);
-        window.showToast("Ads not available right now.", "error");
-        claimBtn.disabled = false;
-        claimBtn.innerText = "CLAIM REWARDS";
-    });
-};
+    } catch (e) {
+        console.error("Buy Miner Error:", e);
+        window.showTopToast("Purchase failed. Please try again.", "error");
+    }
+}
+window.buyUpgrade = buyUpgrade;

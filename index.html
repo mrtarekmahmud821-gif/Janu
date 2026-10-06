@@ -64,11 +64,13 @@
     <meta name="bitmedia-site-verification" content="fad5daffd5b9702c0349933c1cce0bac" />
 </head>  
 
-<body class="max-w-md mx-auto min-h-screen pb-24 text-white relative overflow-x-hidden" style="background:#121212;">  
+<body class="max-w-md mx-auto min-h-screen pb-24 text-white relative overflow-x-hidden" style="background:#0c0c0c;">  
 
-<!-- ========== NEW PREMIUM LOADER ========== -->
+<!-- ========== PREMIUM LOADER ========== -->
 <div id="app-loader">
-    <div class="loader-logo">SHIB</div>
+    <div class="loader-logo-wrap">
+        <div class="loader-logo">SHIB</div>
+    </div>
     <div class="loader-text">SHIB MINING</div>
     
     <div class="loading-bar-track">
@@ -78,7 +80,7 @@
 </div>
 
 <!-- Page Switch Loader -->
-<div id="page-loader" class="fixed inset-0 z-[90] bg-[#121212]/85 backdrop-blur-md hidden flex items-center justify-center">
+<div id="page-loader" class="fixed inset-0 z-[90] bg-[#0c0c0c]/85 backdrop-blur-md hidden flex items-center justify-center">
     <div class="flex flex-col items-center">
         <div class="w-10 h-10 rounded-full border-2 border-[#F7931A]/20 border-t-[#F7931A] animate-spin"></div>
         <span class="text-[10px] text-zinc-400 font-bold tracking-widest uppercase mt-3">Loading...</span>
@@ -141,102 +143,148 @@
     </div>  
 
     <div class="mb-6">  
-        <h3 class="text-[10px] text-zinc-400 font-bold tracking-widest uppercase mb-3">My Task Management</h3>  
+        <h3 class="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mb-3">My Task Management</h3>  
         <div id="my-tasks-list" class="space-y-3">  
             <p class="text-[10px] text-zinc-500 italic">Loading your tasks...</p>  
         </div>  
     </div>  
 
     <div class="space-y-3 mb-6">  
-        <h3 class="text-[10px] text-zinc-400 font-bold tracking-widest uppercase">Ad Networks Tasks</h3>  
+        <h3 class="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mb-3">Ad Networks Tasks</h3>  
 
-        <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-emerald-500">  
-            <div>  
-                <p class="font-bold text-xs">Monetag Ads Task</p>  
-                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 SHIB</p>  
-            </div>  
-            <button id="btn-monetag" onclick="watchTaskAd('monetag')" class="bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">WATCH</button>  
-        </div>  
-
-        <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-emerald-500">  
-            <div>  
-                <p class="font-bold text-xs">Adexium Ads Task</p>  
-                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 SHIB</p>  
-            </div>  
-            <button id="btn-adexium" onclick="watchTaskAd('adexium')" class="bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">WATCH</button>  
+        <!-- Monetag -->
+        <div class="task-card">
+            <div class="flex items-center gap-3">
+                <div class="task-icon" style="background:rgba(16,185,129,0.15);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+                <div>
+                    <p class="font-bold text-sm text-white">Monetag Ads</p>
+                    <p class="text-[10px] text-emerald-400 font-semibold">+50 SHIB</p>
+                </div>
+            </div>
+            <button id="btn-monetag" onclick="watchTaskAd('monetag')" class="task-btn" style="background:#10b981;">WATCH</button>
         </div>
 
-        <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-emerald-500">  
-            <div>  
-                <p class="font-bold text-xs">GigaPub Ads Task</p>  
-                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 SHIB</p>  
-            </div>  
-            <button id="btn-gigapub" onclick="watchTaskAd('gigapub')" class="bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">WATCH</button>  
-        </div>  
-
-        <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-emerald-500">  
-            <div>  
-                <p class="font-bold text-xs">TadsAds Task</p>  
-                <p class="text-[10px] text-emerald-400 font-semibold">REWARD: 50 SHIB</p>  
-            </div>  
-            <button id="btn-tads" onclick="watchTaskAd('tads')" class="bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">WATCH</button>  
+        <!-- Adexium -->
+        <div class="task-card">
+            <div class="flex items-center gap-3">
+                <div class="task-icon" style="background:rgba(99,102,241,0.15);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                </div>
+                <div>
+                    <p class="font-bold text-sm text-white">Adexium Ads</p>
+                    <p class="text-[10px] text-indigo-400 font-semibold">+50 SHIB</p>
+                </div>
+            </div>
+            <button id="btn-adexium" onclick="watchTaskAd('adexium')" class="task-btn" style="background:#6366f1;">WATCH</button>
         </div>
 
-        <div class="space-y-3 mt-4">
-            <h3 class="text-[10px] text-zinc-400 font-bold tracking-widest uppercase">Web Visit Tasks</h3>
-
-            <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-teal-500">
-                <div>
-                    <p class="font-bold text-xs text-white">Visit & Earn SHIB</p>
-                    <p class="text-[10px] text-teal-400 font-semibold">REWARD: 50 SHIB</p>
-                    <p id="webVisitTimer" class="text-[10px] text-zinc-400 hidden"></p>
+        <!-- GigaPub -->
+        <div class="task-card">
+            <div class="flex items-center gap-3">
+                <div class="task-icon" style="background:rgba(245,158,11,0.15);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
                 </div>
-                <button id="btn-web-visit" onclick="handleWebVisit()" class="bg-teal-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">VISIT</button>
+                <div>
+                    <p class="font-bold text-sm text-white">GigaPub Ads</p>
+                    <p class="text-[10px] text-amber-400 font-semibold">+50 SHIB</p>
+                </div>
+            </div>
+            <button id="btn-gigapub" onclick="watchTaskAd('gigapub')" class="task-btn" style="background:#f59e0b;">WATCH</button>
+        </div>
+
+        <!-- Tads -->
+        <div class="task-card">
+            <div class="flex items-center gap-3">
+                <div class="task-icon" style="background:rgba(236,72,153,0.15);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <div>
+                    <p class="font-bold text-sm text-white">TadsAds Task</p>
+                    <p class="text-[10px] text-pink-400 font-semibold">+50 SHIB</p>
+                </div>
+            </div>
+            <button id="btn-tads" onclick="watchTaskAd('tads')" class="task-btn" style="background:#ec4899;">WATCH</button>
+        </div>
+
+        <div class="space-y-3 mt-5">
+            <h3 class="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mb-3">Web Visit Tasks</h3>
+
+            <div class="task-card">
+                <div class="flex items-center gap-3">
+                    <div class="task-icon" style="background:rgba(20,184,166,0.15);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-white">Visit & Earn SHIB</p>
+                        <p class="text-[10px] text-teal-400 font-semibold">+50 SHIB</p>
+                        <p id="webVisitTimer" class="text-[10px] text-zinc-400 hidden"></p>
+                    </div>
+                </div>
+                <button id="btn-web-visit" onclick="handleWebVisit()" class="task-btn" style="background:#14b8a6;">VISIT</button>
             </div>
 
-            <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-teal-500">
-                <div>
-                    <p class="font-bold text-xs text-white">Visit & Earn SHIB 2</p>
-                    <p class="text-[10px] text-teal-400 font-semibold">REWARD: 50 SHIB</p>
-                    <p id="webVisitTimer2" class="text-[10px] text-zinc-400 hidden"></p>
+            <div class="task-card">
+                <div class="flex items-center gap-3">
+                    <div class="task-icon" style="background:rgba(20,184,166,0.15);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-white">Visit & Earn SHIB 2</p>
+                        <p class="text-[10px] text-teal-400 font-semibold">+50 SHIB</p>
+                        <p id="webVisitTimer2" class="text-[10px] text-zinc-400 hidden"></p>
+                    </div>
                 </div>
-                <button id="btn-web-visit-2" onclick="handleWebVisit2()" class="bg-teal-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">VISIT</button>
+                <button id="btn-web-visit-2" onclick="handleWebVisit2()" class="task-btn" style="background:#14b8a6;">VISIT</button>
             </div>
 
-            <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-violet-500">
-                <div>
-                    <p class="font-bold text-xs text-white">AdsGram Web Task</p>
-                    <p class="text-[10px] text-violet-400 font-semibold">REWARD: 200 SHIB</p>
-                    <p id="adsGramLoadingTimer" class="text-[10px] text-[#F7931A] hidden"></p>
+            <div class="task-card">
+                <div class="flex items-center gap-3">
+                    <div class="task-icon" style="background:rgba(139,92,246,0.15);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-white">AdsGram Web Task</p>
+                        <p class="text-[10px] text-violet-400 font-semibold">+200 SHIB</p>
+                        <p id="adsGramLoadingTimer" class="text-[10px] text-[#F7931A] hidden"></p>
+                    </div>
                 </div>
-                <adsgram-task data-block-id="task-30650" data-debug="false" id="adsgram-task-component" style="display: block; background: #F7931A; color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;"></adsgram-task>
+                <adsgram-task data-block-id="task-30650" data-debug="false" id="adsgram-task-component" style="display:block;background:#8b5cf6;color:#fff;padding:8px 14px;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;"></adsgram-task>
             </div>
 
-            <div class="glass p-3.5 rounded-2xl flex justify-between items-center border-l-4 border-amber-500">
-                <div>
-                    <p class="font-bold text-xs text-white">Tads Sponsored Task</p>
-                    <p class="text-[10px] text-amber-400 font-semibold">REWARD: 200 SHIB</p>
+            <div class="task-card">
+                <div class="flex items-center gap-3">
+                    <div class="task-icon" style="background:rgba(245,158,11,0.15);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-white">Tads Sponsored Task</p>
+                        <p class="text-[10px] text-amber-400 font-semibold">+200 SHIB</p>
+                    </div>
                 </div>
                 <div id="tads-container-10891"></div>
             </div>
         </div>
 
-        <h3 class="text-[10px] text-zinc-400 font-bold tracking-widest uppercase mt-6 mb-2">Social Missions</h3>
+        <h3 class="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mt-6 mb-3">Social Missions</h3>
         <div id="available-tasks-list" class="space-y-3">  
             <div class="glass p-4 rounded-xl text-center">  
                 <p class="text-[10px] text-zinc-500 italic">Searching for new missions...</p>       
             </div>  
         </div>  
 
-        <div class="bg-zinc-900/90 border border-[#F7931A]/30 rounded-2xl p-4 flex items-center justify-between shadow-lg mt-4">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-[#F7931A]/15 rounded-xl flex items-center justify-center border border-[#F7931A]/30 text-xl">📋</div>
+        <div class="task-card mt-4" style="border-color:rgba(247,147,26,0.25);">
+            <div class="flex items-center gap-3">
+                <div class="task-icon" style="background:rgba(247,147,26,0.15);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F7931A" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+                </div>
                 <div>
-                    <h4 class="text-white font-bold text-xs">GigaPub Offerwall</h4>
-                    <p class="text-[10px] text-[#F7931A] font-medium">REWARD: 100 - 500+ SHIB</p>
+                    <h4 class="text-white font-bold text-sm">GigaPub Offerwall</h4>
+                    <p class="text-[10px] text-[#F7931A] font-medium">+100 - 500+ SHIB</p>
                 </div>
             </div>
-            <button onclick="openGigaOfferwall()" class="bg-[#F7931A] hover:bg-[#e08515] text-white font-bold text-xs px-4 py-2 rounded-xl transition-all">OPEN</button>
+            <button onclick="openGigaOfferwall()" class="task-btn" style="background:#F7931A;">OPEN</button>
         </div>
     </div>
 </div>
@@ -422,13 +470,10 @@ Earn 200 SHIB every 15 mins automatically!
     </div>
 </div>
 
-<!-- অন্যান্য মোডালগুলো (অপরিবর্তিত রাখা হয়েছে, শুধু কালার অ্যাডজাস্ট) -->
-<!-- Ad Task, Bonus, Withdraw Success, Locked, Banned — আগের মতোই কাজ করবে -->
-
+<!-- Ad Task Modal -->
 <div id="modal-adtask" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm">  
     <div class="glass w-full max-w-sm p-6 rounded-3xl border border-[#F7931A]/30 max-h-[90vh] overflow-y-auto">  
         <h3 class="text-lg font-bold mb-4 text-[#F7931A] uppercase">Promote Channel / Group</h3>  
-        <!-- ভিতরের কনটেন্ট আগের মতো রাখুন -->
         <div class="space-y-3">  
             <div>
                 <label class="text-[9px] text-zinc-400 uppercase font-bold">Promotion Type</label>
@@ -467,6 +512,7 @@ Earn 200 SHIB every 15 mins automatically!
     </div>  
 </div>
 
+<!-- Daily Bonus Modal -->
 <div id="modal-bonus" class="fixed inset-0 bg-black/90 z-[105] hidden flex items-center justify-center p-6 backdrop-blur-sm">  
     <div class="glass w-full max-w-sm p-6 rounded-3xl border border-[#F7931A]/30">  
         <h3 class="text-lg font-bold mb-4 text-[#F7931A] text-center uppercase">Daily Rewards</h3>  
@@ -476,6 +522,7 @@ Earn 200 SHIB every 15 mins automatically!
     </div>  
 </div>  
 
+<!-- Withdraw Success Modal -->
 <div id="modal-withdraw-success" class="fixed inset-0 bg-black/90 z-[110] hidden flex items-center justify-center p-6 backdrop-blur-sm">  
     <div class="glass w-full max-w-sm p-6 rounded-3xl border border-emerald-500/30 text-center">  
         <div class="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-emerald-500/30 text-emerald-400 font-bold text-xl">✓</div>
@@ -486,6 +533,7 @@ Earn 200 SHIB every 15 mins automatically!
     </div>  
 </div>
 
+<!-- Withdraw Locked Modal -->
 <div id="modal-withdraw-locked" class="fixed inset-0 bg-black/90 z-[110] hidden flex items-center justify-center p-6 backdrop-blur-sm">  
     <div class="glass w-full max-w-sm p-6 rounded-3xl border border-red-500/30 text-center">  
         <div class="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-red-500/30 text-red-400 font-bold text-xl">🔒</div>
@@ -499,12 +547,112 @@ Earn 200 SHIB every 15 mins automatically!
     </div>  
 </div>
     
-<div id="banned-screen-modal" class="fixed inset-0 z-[99999] bg-[#121212] flex flex-col items-center justify-center p-6 text-center hidden">
+<!-- Banned Screen -->
+<div id="banned-screen-modal" class="fixed inset-0 z-[99999] bg-[#0c0c0c] flex flex-col items-center justify-center p-6 text-center hidden">
     <div class="max-w-md w-full bg-zinc-900 border border-red-500/30 rounded-3xl p-6 flex flex-col items-center">
         <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/30 mb-4 text-red-500 text-2xl font-bold">⚠️</div>
         <h2 class="text-xl font-black text-white uppercase mb-2">ACCOUNT SUSPENDED</h2>
         <p class="text-xs text-zinc-400 mb-6">Your account has been banned due to terms violation.</p>
         <button id="btn-banned-refresh" onclick="handleBannedRefresh()" class="w-full bg-red-600/20 text-red-400 border border-red-500/40 py-3 rounded-xl font-bold text-xs uppercase">REFRESH STATUS</button>
+    </div>
+</div>
+
+<!-- ===== RED PACKET MODAL ===== -->
+<div id="modal-redpacket" class="fixed inset-0 bg-black/90 z-[110] hidden flex items-center justify-center p-5 backdrop-blur-sm">
+    <div class="glass w-full max-w-sm p-6 rounded-3xl border border-red-500/25 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-5">
+            <h3 class="text-lg font-black text-red-400 uppercase">Red Packet</h3>
+            <button onclick="closeModal('modal-redpacket')" class="text-zinc-400 text-xl">✕</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 bg-zinc-900/80 p-1 rounded-2xl mb-5">
+            <button id="rp-tab-create" onclick="switchRpTab('create')" class="py-2.5 rounded-xl font-bold text-xs uppercase bg-red-600 text-white">Create</button>
+            <button id="rp-tab-claim" onclick="switchRpTab('claim')" class="py-2.5 rounded-xl font-bold text-xs uppercase text-zinc-400">Claim</button>
+        </div>
+
+        <!-- CREATE VIEW -->
+        <div id="rp-create-view" class="space-y-4">
+            <div>
+                <label class="text-[10px] text-zinc-400 uppercase font-bold mb-1 block">Total Users</label>
+                <input id="rp-users" type="number" min="1" max="100" placeholder="How many users?" class="rp-input" oninput="calcRpTotal()">
+            </div>
+            <div>
+                <label class="text-[10px] text-zinc-400 uppercase font-bold mb-1 block">SHIB per User</label>
+                <input id="rp-amount" type="number" min="10" placeholder="Amount per user" class="rp-input" oninput="calcRpTotal()">
+            </div>
+            <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-[11px] text-red-300">
+                <p>Total cost calculated automatically.</p>
+                <p class="mt-1">You earn <b>100 SHIB</b> for every successful claim.</p>
+            </div>
+            <div id="rp-total-cost" class="text-center text-sm font-bold text-white">Total: 0 SHIB</div>
+            <button onclick="createRedPacket()" class="w-full bg-red-600 hover:bg-red-500 py-3.5 rounded-xl font-bold text-xs uppercase text-white">Create Red Packet</button>
+            
+            <div id="rp-code-result" class="hidden mt-4 p-4 bg-black/40 rounded-xl border border-red-500/30 text-center">
+                <p class="text-[10px] text-zinc-400 mb-2">Your Red Packet Code</p>
+                <p id="rp-generated-code" class="text-lg font-mono font-black text-red-400 tracking-widest mb-3">XXXX-XXXX</p>
+                <button onclick="copyRpCode()" class="bg-red-600/30 text-red-300 px-4 py-2 rounded-lg text-xs font-bold">COPY CODE</button>
+            </div>
+        </div>
+
+        <!-- CLAIM VIEW -->
+        <div id="rp-claim-view" class="space-y-4 hidden">
+            <div>
+                <label class="text-[10px] text-zinc-400 uppercase font-bold mb-1 block">Enter Code</label>
+                <input id="rp-claim-code" type="text" placeholder="Paste red packet code" class="rp-input uppercase">
+            </div>
+            <button onclick="claimRedPacket()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3.5 rounded-xl font-bold text-xs uppercase text-white">Watch Ad & Claim</button>
+            <p class="text-[10px] text-center text-zinc-500">You must watch a full ad (AdsGram) to claim tokens.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== FLOATING ACTION BUTTON ===== -->
+<button id="fab-menu" onclick="openFabSheet()">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+</button>
+
+<div id="fab-sheet" onclick="closeFabSheet(event)">
+    <div class="fab-sheet-content" onclick="event.stopPropagation()">
+        <div class="w-12 h-1 bg-zinc-700 rounded-full mx-auto mb-5"></div>
+        <h3 class="text-center text-sm font-bold text-white mb-5 tracking-wide">QUICK MENU</h3>
+
+        <div class="fab-item" onclick="openGiftHub(); closeFabSheet();">
+            <div class="fab-icon" style="background:rgba(247,147,26,0.15);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F7931A" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-bold text-sm text-white">Miner Store</p>
+                <p class="text-[10px] text-zinc-400">Buy & upgrade miners</p>
+            </div>
+        </div>
+
+        <div class="fab-item" onclick="openModal('modal-bonus'); closeFabSheet();">
+            <div class="fab-icon" style="background:rgba(234,179,8,0.15);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-bold text-sm text-white">Daily Bonus</p>
+                <p class="text-[10px] text-zinc-400">Claim free rewards</p>
+            </div>
+        </div>
+
+        <div class="fab-item" onclick="openModal('modal-redpacket'); closeFabSheet();">
+            <div class="fab-icon" style="background:rgba(239,68,68,0.15);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                    <rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 8v12M3 12h18"/><path d="M7 8V6a2 2 0 012-2h6a2 2 0 012 2v2"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-bold text-sm text-white">Red Packet</p>
+                <p class="text-[10px] text-zinc-400">Create or claim packets</p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -538,10 +686,11 @@ Earn 200 SHIB every 15 mins automatically!
 <script type="module" src="./assets/js/offerwall.js"></script>
 <script type="module" src="./assets/js/deposit.js"></script>
 <script type="module" src="assets/js/webvisit.js"></script>
+<script type="module" src="./assets/js/redpacket.js"></script>
 <script src="assets/js/app-navigation.js"></script>
 
 <script>
-    // ========== NEW LOADING BAR LOGIC ==========
+    // ========== PREMIUM LOADING BAR ==========
     window.addEventListener('load', () => {
         const bar = document.getElementById('loading-bar');
         const percentText = document.getElementById('loading-percent');
@@ -549,21 +698,23 @@ Earn 200 SHIB every 15 mins automatically!
         let progress = 0;
 
         const interval = setInterval(() => {
-            progress += Math.random() * 12 + 4;
+            progress += Math.random() * 11 + 5;
             if (progress >= 100) {
                 progress = 100;
                 clearInterval(interval);
-                bar.style.width = '100%';
-                percentText.innerText = '100%';
+                if (bar) bar.style.width = '100%';
+                if (percentText) percentText.innerText = '100%';
                 setTimeout(() => {
-                    loader.style.opacity = '0';
-                    setTimeout(() => loader.style.display = 'none', 400);
-                }, 300);
+                    if (loader) {
+                        loader.style.opacity = '0';
+                        setTimeout(() => loader.style.display = 'none', 400);
+                    }
+                }, 280);
             } else {
-                bar.style.width = progress + '%';
-                percentText.innerText = Math.floor(progress) + '%';
+                if (bar) bar.style.width = progress + '%';
+                if (percentText) percentText.innerText = Math.floor(progress) + '%';
             }
-        }, 120);
+        }, 110);
     });
 
     const tg = window.Telegram?.WebApp;
@@ -653,7 +804,10 @@ Earn 200 SHIB every 15 mins automatically!
 
     function copyBotUsername() {
         const botText = document.getElementById("bot-username").innerText;
-        navigator.clipboard.writeText(botText).then(() => alert("Bot username copied: " + botText));
+        navigator.clipboard.writeText(botText).then(() => {
+            if (window.showTopToast) window.showTopToast("Bot username copied!", "success");
+            else alert("Bot username copied: " + botText);
+        });
     }
 
     function closeModal(id) {
@@ -662,6 +816,51 @@ Earn 200 SHIB every 15 mins automatically!
 
     function openModal(id) {
         document.getElementById(id)?.classList.remove('hidden');
+    }
+
+    // ===== FAB Helpers =====
+    function openFabSheet() {
+        document.getElementById('fab-sheet').classList.add('open');
+    }
+    function closeFabSheet(e) {
+        if (!e || e.target.id === 'fab-sheet') {
+            document.getElementById('fab-sheet').classList.remove('open');
+        }
+    }
+
+    // ===== Red Packet Tab Switch + Total Calc =====
+    function switchRpTab(tab) {
+        const createView = document.getElementById('rp-create-view');
+        const claimView = document.getElementById('rp-claim-view');
+        const createBtn = document.getElementById('rp-tab-create');
+        const claimBtn = document.getElementById('rp-tab-claim');
+        if (tab === 'create') {
+            createView.classList.remove('hidden');
+            claimView.classList.add('hidden');
+            createBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase bg-red-600 text-white";
+            claimBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase text-zinc-400";
+        } else {
+            createView.classList.add('hidden');
+            claimView.classList.remove('hidden');
+            claimBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase bg-emerald-600 text-white";
+            createBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase text-zinc-400";
+        }
+    }
+
+    function calcRpTotal() {
+        const users = Number(document.getElementById('rp-users')?.value) || 0;
+        const amount = Number(document.getElementById('rp-amount')?.value) || 0;
+        const total = users * amount;
+        const el = document.getElementById('rp-total-cost');
+        if (el) el.innerText = `Total: ${total.toLocaleString()} SHIB`;
+    }
+
+    function copyRpCode() {
+        const code = document.getElementById('rp-generated-code')?.innerText || '';
+        navigator.clipboard.writeText(code).then(() => {
+            if (window.showTopToast) window.showTopToast("Code copied!", "success");
+            else alert("Code copied: " + code);
+        });
     }
 </script>
 
@@ -679,4 +878,4 @@ Earn 200 SHIB every 15 mins automatically!
 </script>
 
 </body>  
-    </html>
+</html>

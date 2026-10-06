@@ -54,7 +54,7 @@ window.tg = tg;
 let currentUser = { 
     id: "000000", 
     name: "Loading...", 
-    pp: 0,               // এখন SHIB হিসেবে ব্যবহার হবে
+    pp: 0,
     usdt: 0, 
     totalDeposited: 0, 
     referrals: 0, 
@@ -178,7 +178,7 @@ if (tg && tg.BackButton) {
 }
 
 // =======================================================
-// UI আপডেট
+// UI আপডেট  ✅ FIXED — প্রোফাইল ব্যালেন্স
 // =======================================================
 function updateUI() {
     if (!currentUser) return;
@@ -223,7 +223,7 @@ function updateUI() {
             refUnlockStatus.className = "text-xs font-black text-emerald-400 mt-1";
         } else {
             const needed = Math.max(0, 5 - refCount);
-            refUnlockStatus.innerText = `${needed} Referrals Needed`;
+            refUnlockStatus.innerText = needed + " Referrals Needed";
             refUnlockStatus.className = "text-xs font-black text-amber-400 mt-1";
         }
     }
@@ -233,11 +233,16 @@ function updateUI() {
         if (badge) badge.classList.remove('hidden');
     }
 
+    // ✅ সঠিক ব্যালেন্স ডিসপ্লে (আগে ভুল টেমপ্লেট স্ট্রিং ছিল)
     const adBalanceEl = document.getElementById('ad-balance');
-    if (adBalanceEl) adBalanceEl.innerText = `\[ {Number(currentUser.usdt || 0).toFixed(2)}`;
+    if (adBalanceEl) {
+        adBalanceEl.textContent = "$" + Number(currentUser.usdt || 0).toFixed(2);
+    }
 
     const totalDepositEl = document.getElementById('total-deposit-show');
-    if (totalDepositEl) totalDepositEl.innerText = ` \]{Number(currentUser.totalDeposited || 0).toFixed(2)}`;
+    if (totalDepositEl) {
+        totalDepositEl.textContent = "$" + Number(currentUser.totalDeposited || 0).toFixed(2);
+    }
 
     // SHIB ব্যালেন্স আপডেট
     const currentFullBalance = currentUser.pp || 0;
@@ -305,7 +310,7 @@ async function init() {
     let userCountry = "Unknown";
     fetchUserCountry().then(c => {
         userCountry = c;
-        if(currentUser) currentUser.country = c;
+        if (currentUser) currentUser.country = c;
     });
 
     const userRef = doc(db, "users", currentUser.id);
@@ -333,6 +338,7 @@ async function init() {
             }
 
             currentUser = { ...currentUser, ...userData, lastActive: currentTime, country: userCountry };
+            window.currentUser = currentUser;
 
             if (!currentUser.hasReceivedFreeCard) {
                 const freeCard = createCardObject('free', 48, 200, 0.22, 'Free Starter Miner');
@@ -353,20 +359,42 @@ async function init() {
                 }).catch(e => console.error(e));
             }
 
+            // পুরনো ইউজার যদি রেফার লিংক দিয়ে আসে কিন্তু referredBy না থাকে
+            if (referrerId && referrerId !== currentUser.id && !currentUser.referredBy) {
+                if (window.registerPendingReferral) {
+                    await window.registerPendingReferral(currentUser.id, referrerId);
+                } else {
+                    updateDoc(userRef, {
+                        referredBy: String(referrerId),
+                        referralStatus: "pending",
+                        adTasksCompleted: 0,
+                        completedAdTasks: []
+                    }).catch(e => console.error(e));
+                }
+            }
+
         } else {
-            // নতুন ইউজার
+            // ========== নতুন ইউজার ==========
+            // রেফার: শুধু pending — কাউন্ট বাড়বে না যতক্ষণ ৫টা অ্যাড টাস্ক না হয়
             const freeCard = createCardObject('free', 48, 200, 0.22, 'Free Starter Miner');
+            const validReferrer = (referrerId && referrerId !== currentUser.id) ? String(referrerId) : null;
+
             const newUser = {
                 id: currentUser.id,
                 name: currentUser.name,
+                photo: currentUser.photo || "",
                 pp: 0,
                 usdt: 0,
+                totalDeposited: 0,
                 country: userCountry,
                 lastActive: currentTime,
                 total_ref_earnings: 0,
                 referral_count: 0,
                 referrals: 0,
-                referredBy: (referrerId && referrerId !== currentUser.id) ? referrerId : null,
+                referredBy: validReferrer,
+                referralStatus: validReferrer ? "pending" : "none",
+                adTasksCompleted: 0,
+                completedAdTasks: [],
                 referralRewarded: false,
                 lastBonus: 0,
                 bonusDay: 0,
@@ -386,25 +414,17 @@ async function init() {
 
             await setDoc(userRef, newUser);
             currentUser = newUser;
+            window.currentUser = currentUser;
 
-            if (newUser.referredBy && !newUser.referralRewarded) {
-                const refRef = doc(db, "users", newUser.referredBy);
-                getDoc(refRef).then(async (refSnap) => {
-                    if (refSnap.exists()) {
-                        const refData = refSnap.data();
-                        const refCard = createCardObject('referral', 48, 200, 0.22, 'Referral Reward Miner');
-                        const existingCards = refData.miningCards || [];
-                        existingCards.push(refCard);
-
-                        await updateDoc(refRef, { 
-                            referral_count: increment(1),
-                            referrals: increment(1),
-                            total_ref_earnings: increment(1000),
-                            miningCards: existingCards
-                        });
-                        await updateDoc(userRef, { referralRewarded: true });
-                    }
-                }).catch(e => console.error(e));
+            // ❌ আগে এখানে সঙ্গে সঙ্গে referral_count +1 ও মাইনার কার্ড দেওয়া হত
+            // ✅ এখন শুধু pending — ৫টা অ্যাড নেটওয়ার্ক টাস্ক কমপ্লিট হলে
+            //    refer.js এর onAdNetworkTaskComplete → confirmReferral চলবে
+            if (validReferrer && window.registerPendingReferral) {
+                try {
+                    await window.registerPendingReferral(currentUser.id, validReferrer);
+                } catch (e) {
+                    console.error("Pending referral register error:", e);
+                }
             }
         }
 
@@ -418,6 +438,8 @@ async function init() {
     } catch (e) {
         console.error("Init Error:", e);
     }
+
+    window.currentUser = currentUser;
 
     const refLinkElement = document.getElementById('ref-link');
     if (refLinkElement) {
@@ -595,7 +617,7 @@ function startPremiumLoader() {
                 loader.style.opacity = '0';
                 setTimeout(() => {
                     loader.style.display = 'none';
-                    init(); // লোডিং শেষ হলে অ্যাপ চালু
+                    init();
                 }, 400);
             }, 250);
         } else {

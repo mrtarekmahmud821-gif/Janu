@@ -53,6 +53,7 @@ async function watchTaskAd(network) {
 window.watchTaskAd = watchTaskAd;
 
 // অ্যাড দেখার পর রিওয়ার্ড দেওয়া
+// ✅ রেফার ট্র্যাকিং: ৫টা অ্যাড নেটওয়ার্ক টাস্ক হলে রেফার কাউন্ট হবে
 async function giveAdReward(amount, network) {
     if (!window.currentUser || !window.db) return;
 
@@ -68,6 +69,12 @@ async function giveAdReward(amount, network) {
 
         window.triggerHaptic('notification', 'success');
         window.showTopToast(`+${amount} SHIB received from ${network}!`, "success");
+
+        // রেফার pending থাকলে অ্যাড টাস্ক কাউন্ট বাড়াও
+        // (৫টা হলে refer.js confirmReferral চালাবে)
+        if (typeof window.onAdNetworkTaskComplete === 'function') {
+            window.onAdNetworkTaskComplete(network);
+        }
     } catch (e) {
         console.error("Reward Error:", e);
     }
@@ -110,18 +117,22 @@ export async function loadAvailableTasks() {
                 const alreadyDone = completedByArray.includes(currentUserId);
 
                 if (!alreadyDone && (Number(task.currentJoined) < Number(task.targetUsers))) {
+                    // ✅ সঠিক template — আগে ভুল \( \{  ছিল
+                    const channelLink = (task.channelLink || "").replace(/'/g, "\\'");
+                    const chatIdVal = (task.chatId || "").toString().replace(/'/g, "\\'");
+
                     html += `
                     <div id="task-card-${taskId}" class="glass p-4 rounded-xl flex justify-between items-center border border-white/5 mb-2">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-[#F7931A]/10 rounded-full flex items-center justify-center text-[#F7931A] font-bold text-[10px]">TG</div>
                             <div>
-                                <p class="text-sm font-bold truncate w-32">${task.channelName}</p>
+                                <p class="text-sm font-bold truncate w-32">${task.channelName || "Channel"}</p>
                                 <p class="text-[10px] text-emerald-400 font-bold">+${task.reward || 100} SHIB</p>
                             </div>
                         </div>
                         <button id="task-btn-${taskId}" 
                                 data-status="join"
-                                onclick="handleTelegramTask('\( {task.channelLink}', ' \){taskId}', '${task.chatId}')" 
+                                onclick="handleTelegramTask('\( {channelLink}', ' \){taskId}', '${chatIdVal}')" 
                                 class="bg-[#F7931A] px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition-all">Join</button>
                     </div>`;
                 }
@@ -146,7 +157,7 @@ window.handleTelegramTask = function(usernameOrLink, taskId, chatId) {
     
     if (!btn || !currentUserId || window.isProcessing || btn.disabled) return; 
 
-    let cleanUsername = usernameOrLink.trim();
+    let cleanUsername = (usernameOrLink || "").trim();
     if (cleanUsername.includes("t.me/")) {
         const parts = cleanUsername.split("t.me/");
         if (parts[1]) {

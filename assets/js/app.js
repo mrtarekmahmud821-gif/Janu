@@ -1,16 +1,15 @@
-// ==========================================
-// File: app.js
-// Description: অ্যাপের মূল কনফিগারেশন, টেলিগ্রামের নেটিভ ব্যাক বাটন ও লোডার
-// ==========================================
+// =======================================================
+// app.js - মূল অ্যাপ লজিক, ইউজার স্টেট, ইনিট, নেভিগেশন
+// =======================================================
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { 
     getFirestore, doc, getDoc, setDoc, updateDoc, increment, 
     collection, query, orderBy, limit, getDocs, addDoc, 
-    serverTimestamp, arrayUnion, where 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    serverTimestamp, arrayUnion, where, onSnapshot, runTransaction
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-// --- ফায়ারবেস কনফিগারেশন ---
+// --- Firebase Configuration ---
 const firebaseConfig = {
     apiKey: "AIzaSyAD0iYQhYwUWdssGzYFHR9kbP1ZQTlsm80",
     authDomain: "free-income-app-eeade.firebaseapp.com",
@@ -20,83 +19,74 @@ const firebaseConfig = {
     appId: "1:780467222664:web:5f09f8f03833e7b19f873d"
 };
 
-// ফায়ারবেস অ্যাপ ও ডাটাবেস সেটআপ
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// গ্লোবাল এক্সপোর্ট (অন্য ফাইল থেকে ব্যবহারের জন্য)
 window.db = db;
 window.doc = doc;
 window.updateDoc = updateDoc;
 window.increment = increment;
+window.collection = collection;
+window.query = query;
+window.where = where;
 window.getDoc = getDoc;
 window.setDoc = setDoc;
-window.collection = collection;
-window.addDoc = addDoc;
+window.onSnapshot = onSnapshot;
+window.runTransaction = runTransaction;
 window.serverTimestamp = serverTimestamp;
+window.arrayUnion = arrayUnion;
+window.orderBy = orderBy;
+window.limit = limit;
+window.getDocs = getDocs;
+window.addDoc = addDoc;
 
-// --- টেলিগ্রাম WebApp ইনিশিয়ালাইজেশন ---
-const tg = window.Telegram?.WebApp || window.Telegram;
-window.tg = tg;
-
+// --- Telegram WebApp ---
+const tg = window.Telegram?.WebApp || null;
 if (tg) {
     tg.expand();
     tg.ready();
+    tg.enableClosingConfirmation();
 }
+window.tg = tg;
 
-// --- গ্লোবাল ইউজার অবজেক্ট (Currency: SHIB) ---
+// --- App State ---
 let currentUser = { 
-    id: "000000", name: "Loading...", shib: 0, usdt: 0, 
-    totalDeposited: 0, referrals: 0, referral_count: 0, photo: "", lastBonus: 0, bonusDay: 0,
-    miningStartTime: 0, uid: "", miningCards: [], hasReceivedFreeCard: false,
-    hasPremiumMiner: false, isWithdrawUnlocked: false, isVerified: false, isBanned: false
+    id: "000000", 
+    name: "Loading...", 
+    pp: 0,               // এখন SHIB হিসেবে ব্যবহার হবে
+    usdt: 0, 
+    totalDeposited: 0, 
+    referrals: 0, 
+    referral_count: 0, 
+    photo: "", 
+    lastBonus: 0, 
+    bonusDay: 0,
+    miningStartTime: 0, 
+    uid: "", 
+    miningCards: [], 
+    hasReceivedFreeCard: false,
+    hasPremiumMiner: false, 
+    isWithdrawUnlocked: false, 
+    isVerified: false, 
+    isBanned: false
 };
 window.currentUser = currentUser;
-window.currentTab = 'home';
 
-// --- টেলিগ্রাম নেটিভ লোডার (Progress Indicator) ---
-window.showTelegramLoader = function() {
-    if (tg && tg.MainButton) {
-        tg.MainButton.showProgress(false);
-    }
-};
+let isRichAdsEnabled = false;
+let richAdsInterval = 15;
+let adCooldownMinutes = 5; 
+let lastClickedTaskId = null;
+let currentTab = 'home';
+let miningRenderInterval = null;
+let isProcessing = false;
+window.selectedWithdrawAmount = 0;
+window.isProcessing = false;
 
-window.hideTelegramLoader = function() {
-    if (tg && tg.MainButton) {
-        tg.MainButton.hideProgress();
-    }
-};
-
-// --- টেলিগ্রাম নেটিভ ব্যাক বাটন হ্যান্ডলার ---
-function updateTelegramBackButton() {
-    if (!tg || !tg.BackButton) return;
-    const visibleModals = document.querySelectorAll('.modal:not(.hidden), [id^="modal-"]:not(.hidden), #banned-screen-modal:not(.hidden)');
-    if (visibleModals.length > 0 || (window.currentTab !== 'home' && window.currentTab !== 'main')) {
-        tg.BackButton.show();
-    } else {
-        tg.BackButton.hide();
-    }
-}
-window.updateTelegramBackButton = updateTelegramBackButton;
-
-if (tg && tg.BackButton) {
-    tg.BackButton.onClick(() => {
-        const visibleModals = document.querySelectorAll('.modal:not(.hidden), [id^="modal-"]:not(.hidden)');
-        if (visibleModals.length > 0) {
-            visibleModals.forEach(modal => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            });
-            updateTelegramBackButton();
-            return;
-        }
-        if (window.currentTab !== 'home' && window.currentTab !== 'main') {
-            window.switchTab('home');
-        }
-    });
-}
-
-// --- টোস্ট নোটিফিকেশন ---
-function showToast(message, type = 'info') {
+// =======================================================
+// নোটিফিকেশন সিস্টেম (সবসময় স্ক্রিনের উপরে)
+// =======================================================
+function showTopToast(message, type = 'error') {
     let toast = document.getElementById('top-withdraw-toast');
     if (!toast) {
         toast = document.createElement('div');
@@ -104,9 +94,11 @@ function showToast(message, type = 'info') {
         document.body.appendChild(toast);
     }
 
-    const bgColor = type === 'error' ? 'bg-red-600/90 border-red-400' : 'bg-emerald-600/90 border-emerald-400';
+    const bgColor = type === 'error' 
+        ? 'bg-red-600/90 border-red-400' 
+        : 'bg-emerald-600/90 border-emerald-400';
     
-    toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-2xl text-xs font-semibold text-white shadow-2xl backdrop-blur-md border transition-all duration-300 transform translate-y-0 opacity-100 flex items-center gap-2 max-w-[90vw] text-center ${bgColor}`;
+    toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[99999] px-5 py-3 rounded-2xl text-xs font-semibold text-white shadow-2xl backdrop-blur-md border transition-all duration-300 transform translate-y-0 opacity-100 flex items-center gap-2 max-w-[90vw] text-center ${bgColor}`;
     toast.innerHTML = `<span>${message}</span>`;
 
     setTimeout(() => {
@@ -114,11 +106,13 @@ function showToast(message, type = 'info') {
         toast.classList.remove('translate-y-0', 'opacity-100');
     }, 3000);
 }
-window.showToast = showToast;
-window.showTopToast = showToast;
-window.showCustomTopNotification = showToast;
+window.showTopToast = showTopToast;
+window.showToast = showTopToast;
+window.showCustomTopNotification = showTopToast;
 
-// --- ইউজারের দেশ ট্র্যাক করার ফাংশন ---
+// =======================================================
+// হেল্পার ফাংশন
+// =======================================================
 async function fetchUserCountry() {
     try {
         const controller = new AbortController();
@@ -131,9 +125,61 @@ async function fetchUserCountry() {
         return "Unknown";
     }
 }
-window.fetchUserCountry = fetchUserCountry;
 
-// --- গ্লোবাল UI আপডেট ফাংশন (SHIB রিফ্লেক্ট করে) ---
+function getCleanCurrentUserId() {
+    if (!window.currentUser || !window.currentUser.id) return null;
+    return String(window.currentUser.id).trim();
+}
+window.getCleanCurrentUserId = getCleanCurrentUserId;
+
+function triggerHaptic(type, style = 'medium') {
+    try {
+        if (tg?.HapticFeedback) {
+            if (type === 'impact' && tg.HapticFeedback.impactOccurred) {
+                tg.HapticFeedback.impactOccurred(style);
+            } else if (type === 'notification' && tg.HapticFeedback.notificationOccurred) {
+                tg.HapticFeedback.notificationOccurred(style);
+            }
+        }
+    } catch (e) {
+        console.warn("Haptic feedback not supported:", e);
+    }
+}
+window.triggerHaptic = triggerHaptic;
+
+// =======================================================
+// Telegram Native Back Button
+// =======================================================
+function updateTelegramBackButton() {
+    if (!tg || !tg.BackButton) return;
+    const visibleModals = document.querySelectorAll('[id^="modal-"]:not(.hidden), #banned-screen-modal:not(.hidden)');
+    if (visibleModals.length > 0 || (currentTab !== 'home')) {
+        tg.BackButton.show();
+    } else {
+        tg.BackButton.hide();
+    }
+}
+window.updateTelegramBackButton = updateTelegramBackButton;
+
+if (tg && tg.BackButton) {
+    tg.BackButton.onClick(() => {
+        const visibleModals = document.querySelectorAll('[id^="modal-"]:not(.hidden)');
+        if (visibleModals.length > 0) {
+            visibleModals.forEach(modal => {
+                modal.classList.add('hidden');
+            });
+            updateTelegramBackButton();
+            return;
+        }
+        if (currentTab !== 'home') {
+            switchTab('home');
+        }
+    });
+}
+
+// =======================================================
+// UI আপডেট
+// =======================================================
 function updateUI() {
     if (!currentUser) return;
 
@@ -163,9 +209,6 @@ function updateUI() {
     const totalRefEl = document.getElementById('total-ref');
     if (totalRefEl) totalRefEl.innerText = refCount;
 
-    const refEarnEl = document.getElementById('ref-earn');
-    if (refEarnEl) refEarnEl.innerText = (currentUser.total_ref_earnings || 0).toFixed(0) + " SHIB";
-
     const refUnlockStatus = document.getElementById('ref-unlock-status');
     const hasPremiumMiner = Boolean(
         currentUser.hasPremiumMiner || 
@@ -176,11 +219,11 @@ function updateUI() {
     
     if (refUnlockStatus) {
         if (hasPremiumMiner || refCount >= 5 || currentUser.isWithdrawUnlocked || currentUser.isVerified) {
-            refUnlockStatus.innerText = "UNLOCKED 🔓";
+            refUnlockStatus.innerText = "UNLOCKED";
             refUnlockStatus.className = "text-xs font-black text-emerald-400 mt-1";
         } else {
             const needed = Math.max(0, 5 - refCount);
-            refUnlockStatus.innerText = `${needed} Referrals Needed 🔒`;
+            refUnlockStatus.innerText = `${needed} Referrals Needed`;
             refUnlockStatus.className = "text-xs font-black text-amber-400 mt-1";
         }
     }
@@ -191,16 +234,17 @@ function updateUI() {
     }
 
     const adBalanceEl = document.getElementById('ad-balance');
-    if (adBalanceEl) adBalanceEl.innerText = `$${Number(currentUser.usdt || 0).toFixed(2)}`;
+    if (adBalanceEl) adBalanceEl.innerText = `\[ {Number(currentUser.usdt || 0).toFixed(2)}`;
 
     const totalDepositEl = document.getElementById('total-deposit-show');
-    if (totalDepositEl) totalDepositEl.innerText = `$${Number(currentUser.totalDeposited || 0).toFixed(2)}`;
+    if (totalDepositEl) totalDepositEl.innerText = ` \]{Number(currentUser.totalDeposited || 0).toFixed(2)}`;
 
-    const currentFullBalance = currentUser.shib || currentUser.pp || 0;
+    // SHIB ব্যালেন্স আপডেট
+    const currentFullBalance = currentUser.pp || 0;
     const balanceSelectors = [
-        '#shib-header', '#shib-balance', '#user-shib', '#pp-header', '#pp-balance', '#user-pp',
-        '.shib-amount', '.user-shib', '.shib-balance', '.pp-amount', '.user-pp', '.pp-balance',
-        '#balance-display', '#total-shib', '#total-pp', '#user-coins'
+        '#pp-header', '#pp-balance', '#user-pp',
+        '.pp-amount', '.user-pp', '.pp-balance',
+        '#balance-display', '#total-pp', '#user-coins'
     ];
 
     balanceSelectors.forEach(selector => {
@@ -217,68 +261,33 @@ function updateUI() {
 }
 window.updateUI = updateUI;
 
-// --- মডাল ওপেন ও ক্লোজ ফাংশন ---
-window.openModal = (id) => {
-    const modal = document.getElementById(id);
-    if (modal) {
-        modal.classList.remove('hidden');
-        updateTelegramBackButton();
-    }
-};
+// =======================================================
+// মাইনিং কার্ড অবজেক্ট তৈরি
+// =======================================================
+function createCardObject(type, durationHours, rewardPerCycle, usdtValue, title) {
+    const now = Date.now();
+    const totalCycles = (durationHours * 60) / 15;
+    const totalCoins = totalCycles * rewardPerCycle;
+    return {
+        id: 'card_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
+        type: type,
+        title: title || 'Mining Card',
+        durationHours: durationHours,
+        rewardPerCycle: rewardPerCycle,
+        usdtValue: usdtValue,
+        totalCoins: totalCoins,
+        createdAt: now,
+        expiresAt: now + (durationHours * 60 * 60 * 1000),
+        lastClaimTime: now,
+        cooldownUntil: 0
+    };
+}
+window.createCardObject = createCardObject;
 
-window.closeModal = (id) => {
-    const modal = document.getElementById(id);
-    if (modal) {
-        modal.classList.add('hidden');
-    } else {
-        document.querySelectorAll('.fixed.inset-0').forEach(m => m.classList.add('hidden'));
-    }
-    updateTelegramBackButton();
-};
-
-// --- ট্যাব সুইচিং ---
-window.switchTab = (tab, el) => {
-    window.currentTab = tab;
-    document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    
-    const targetPage = document.getElementById(`page-${tab}`);
-    if (targetPage) {
-        targetPage.classList.remove('hidden');
-    }
-
-    if (tab === 'task' || tab === 'tasks') {
-        if (typeof window.loadAvailableTasks === 'function') window.loadAvailableTasks(); 
-        if (typeof window.loadMyTasksManagement === 'function') window.loadMyTasksManagement(); 
-        if (typeof window.loadAppInstallTasks === 'function') window.loadAppInstallTasks();
-    } 
-    else if (tab === 'refer' || tab === 'leaderboard') {
-        if (typeof window.loadLeaderboard === 'function') window.loadLeaderboard(); 
-    } 
-    else if (tab === 'event') {
-        if (typeof window.loadEventPageData === 'function') window.loadEventPageData();
-    }
-    else if (tab === 'withdraw' || tab === 'profile') {
-        if (typeof window.loadWithdrawHistory === 'function') window.loadWithdrawHistory();
-    }
-
-    if (el) {
-        el.classList.add('active');
-    } else {
-        const navBtn = document.querySelector(`.nav-btn[onclick*="'${tab}'"]`);
-        if (navBtn) navBtn.classList.add('active');
-    }
-    
-    if (tg?.HapticFeedback) {
-        tg.HapticFeedback.impactOccurred('light');
-    }
-
-    updateTelegramBackButton();
-};
-
-// --- অ্যাপ লোড চালুকরণ ---
-async function initApp() {
-    window.showTelegramLoader();
+// =======================================================
+// INIT APP
+// =======================================================
+async function init() {
     const tgUser = tg?.initDataUnsafe?.user;
     currentUser.id = tgUser ? tgUser.id.toString() : "99999";
     currentUser.name = tgUser ? (tgUser.first_name + (tgUser.last_name ? " " + tgUser.last_name : "")) : "Web User";
@@ -293,8 +302,11 @@ async function initApp() {
     }
 
     const currentTime = Date.now(); 
-    let userCountry = await fetchUserCountry();
-    currentUser.country = userCountry;
+    let userCountry = "Unknown";
+    fetchUserCountry().then(c => {
+        userCountry = c;
+        if(currentUser) currentUser.country = c;
+    });
 
     const userRef = doc(db, "users", currentUser.id);
     const settingsRef = doc(db, "settings", "config");
@@ -305,32 +317,30 @@ async function initApp() {
             getDoc(userRef)
         ]);
 
+        if (settingsSnap && settingsSnap.exists()) {
+            const data = settingsSnap.data();
+            adCooldownMinutes = data.adCooldown || 5;
+            isRichAdsEnabled = data.richAdsActive || false; 
+            richAdsInterval = data.richAdsInterval || 60; 
+        }
+
         if (snap && snap.exists()) {
             const userData = snap.data();
 
             if (userData && userData.isBanned === true) {
-                if (typeof window.checkUserBannedStatus === 'function') {
-                    window.checkUserBannedStatus(userData);
-                }
-                window.hideTelegramLoader();
+                window.checkUserBannedStatus(userData);
                 return;
             }
 
             currentUser = { ...currentUser, ...userData, lastActive: currentTime, country: userCountry };
-            
-            // Legacy Balance Synchronization (PP to SHIB)
-            if (userData.pp !== undefined && userData.shib === undefined) {
-                currentUser.shib = userData.pp;
-            }
 
             if (!currentUser.hasReceivedFreeCard) {
-                const freeCard = window.createCardObject ? window.createCardObject('free', 48, 200, 0.22, 'Free Starter Miner') : null;
+                const freeCard = createCardObject('free', 48, 200, 0.22, 'Free Starter Miner');
                 currentUser.miningCards = currentUser.miningCards || [];
-                if (freeCard) currentUser.miningCards.push(freeCard);
+                currentUser.miningCards.push(freeCard);
                 currentUser.hasReceivedFreeCard = true;
 
                 updateDoc(userRef, {
-                    shib: currentUser.shib || 0,
                     miningCards: currentUser.miningCards,
                     hasReceivedFreeCard: true,
                     lastActive: currentTime,
@@ -344,11 +354,12 @@ async function initApp() {
             }
 
         } else {
-            const freeCard = window.createCardObject ? window.createCardObject('free', 48, 200, 0.22, 'Free Starter Miner') : null;
+            // নতুন ইউজার
+            const freeCard = createCardObject('free', 48, 200, 0.22, 'Free Starter Miner');
             const newUser = {
                 id: currentUser.id,
                 name: currentUser.name,
-                shib: 0,
+                pp: 0,
                 usdt: 0,
                 country: userCountry,
                 lastActive: currentTime,
@@ -359,13 +370,18 @@ async function initApp() {
                 referralRewarded: false,
                 lastBonus: 0,
                 bonusDay: 0,
-                miningCards: freeCard ? [freeCard] : [],
+                miningCards: [freeCard],
                 hasReceivedFreeCard: true,
                 hasPremiumMiner: false,
                 isWithdrawUnlocked: false,
                 isVerified: false,
                 isBanned: false,
-                createdAt: serverTimestamp()
+                createdAt: serverTimestamp(),
+                lastAdTime_adsgram: 0, 
+                lastAdTime_monetag: 0, 
+                lastAdTime_adexora: 0, 
+                lastAdTime_gigapub: 0,
+                lastAdTime_adexium: 0
             };
 
             await setDoc(userRef, newUser);
@@ -376,9 +392,9 @@ async function initApp() {
                 getDoc(refRef).then(async (refSnap) => {
                     if (refSnap.exists()) {
                         const refData = refSnap.data();
-                        const refCard = window.createCardObject ? window.createCardObject('referral', 48, 200, 0.22, 'Referral Reward Miner') : null;
+                        const refCard = createCardObject('referral', 48, 200, 0.22, 'Referral Reward Miner');
                         const existingCards = refData.miningCards || [];
-                        if (refCard) existingCards.push(refCard);
+                        existingCards.push(refCard);
 
                         await updateDoc(refRef, { 
                             referral_count: increment(1),
@@ -392,6 +408,7 @@ async function initApp() {
             }
         }
 
+        // Daily Active User Tracking
         const todayStr = new Date().toISOString().split('T')[0];
         const analyticsRef = doc(db, "analytics", todayStr);
         setDoc(analyticsRef, {
@@ -402,12 +419,193 @@ async function initApp() {
         console.error("Init Error:", e);
     }
 
-    window.currentUser = currentUser;
+    const refLinkElement = document.getElementById('ref-link');
+    if (refLinkElement) {
+        refLinkElement.value = `https://t.me/PPCoin_bot/app?startapp=r_${currentUser.id}`;
+    }
     
-    if (typeof window.startMiningCardEngine === 'function') window.startMiningCardEngine();
+    if (window.checkExistingMining) window.checkExistingMining();
+    ['gigapub', 'adsgram', 'monetag', 'adexora', 'adexium'].forEach(type => {
+        if (window.checkSpecificAdCooldown) window.checkSpecificAdCooldown(type);
+    });
+    
+    if (window.checkWebVisitData) window.checkWebVisitData(); 
+    if (window.startMiningCardEngine) window.startMiningCardEngine();
+    
     updateUI();
     updateTelegramBackButton();
-    window.hideTelegramLoader();
+}
+window.init = init;
+
+// =======================================================
+// Banned Screen Logic
+// =======================================================
+window.checkUserBannedStatus = (userData) => {
+    if (userData && userData.isBanned === true) {
+        const modal = document.getElementById('banned-screen-modal');
+        if (modal) modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+            if (window.showBannedAutoAd) window.showBannedAutoAd();
+        }, 3000);
+        return true;
+    }
+    return false;
+};
+
+window.showBannedAutoAd = function() {
+    if (window.Adsgram) {
+        try {
+            const autoAdController = window.Adsgram.init({ blockId: "19948" });
+            autoAdController.show().catch(err => console.error("Banned Ad Error:", err));
+        } catch (e) {
+            console.error("Adsgram Init Error:", e);
+        }
+    }
+};
+
+window.handleBannedRefresh = () => {
+    if (window.Adsgram) {
+        try {
+            const refreshAdController = window.Adsgram.init({ blockId: "int-19954" });
+            refreshAdController.show().then(() => {
+                window.location.reload();
+            }).catch(() => {
+                window.location.reload();
+            });
+        } catch (e) {
+            window.location.reload();
+        }
+    } else {
+        window.location.reload();
+    }
+};
+
+// =======================================================
+// Navigation (Tab Switch)
+// =======================================================
+function switchTab(tabName, pushHistory = true) {
+    if (currentTab === tabName) return;
+
+    const pageLoader = document.getElementById('page-loader');
+    if (pageLoader) pageLoader.classList.remove('hidden');
+
+    setTimeout(() => {
+        document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+        const targetPage = document.getElementById(`page-${tabName}`);
+        const targetNav = document.getElementById(`nav-${tabName}`);
+
+        if (targetPage) targetPage.classList.remove('hidden');
+        if (targetNav) targetNav.classList.add('active');
+
+        currentTab = tabName;
+        window.currentTab = currentTab;
+
+        updateTelegramBackButton();
+        if (pageLoader) pageLoader.classList.add('hidden');
+    }, 180);
+}
+window.switchTab = switchTab;
+
+// =======================================================
+// Modal Helpers
+// =======================================================
+function openModal(id) {
+    document.getElementById(id)?.classList.remove('hidden');
+    updateTelegramBackButton();
+}
+window.openModal = openModal;
+
+function closeModal(id) {
+    document.getElementById(id)?.classList.add('hidden');
+    updateTelegramBackButton();
+}
+window.closeModal = closeModal;
+
+function openGiftHub() {
+    const modal = document.getElementById('modal-gift-hub');
+    const drawer = document.getElementById('gift-hub-content');
+    if (modal) modal.classList.remove('hidden');
+    setTimeout(() => {
+        if (drawer) drawer.classList.add('open');
+    }, 10);
+    updateTelegramBackButton();
+}
+window.openGiftHub = openGiftHub;
+
+function closeGiftHub() {
+    const modal = document.getElementById('modal-gift-hub');
+    const drawer = document.getElementById('gift-hub-content');
+    if (drawer) drawer.classList.remove('open');
+    setTimeout(() => {
+        if (modal) modal.classList.add('hidden');
+    }, 350);
+    updateTelegramBackButton();
+}
+window.closeGiftHub = closeGiftHub;
+
+function switchProfileTab(subTab) {
+    const depView = document.getElementById('profile-deposit-view');
+    const withView = document.getElementById('profile-withdraw-view');
+    const depBtn = document.getElementById('tab-btn-deposit');
+    const withBtn = document.getElementById('tab-btn-withdraw');
+
+    if (subTab === 'deposit') {
+        if (depView) depView.classList.remove('hidden');
+        if (withView) withView.classList.add('hidden');
+        if (depBtn) depBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase transition-all bg-[#F7931A] text-white shadow-md";
+        if (withBtn) withBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase transition-all text-zinc-400 hover:text-white";
+    } else {
+        if (depView) depView.classList.add('hidden');
+        if (withView) withView.classList.remove('hidden');
+        if (withBtn) withBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase transition-all bg-[#F7931A] text-white shadow-md";
+        if (depBtn) depBtn.className = "py-2.5 rounded-xl font-bold text-xs uppercase transition-all text-zinc-400 hover:text-white";
+    }
+}
+window.switchProfileTab = switchProfileTab;
+
+function copyBotUsername() {
+    const botText = document.getElementById("bot-username")?.innerText || "";
+    navigator.clipboard.writeText(botText).then(() => {
+        showTopToast("Bot username copied!", "success");
+    });
+}
+window.copyBotUsername = copyBotUsername;
+
+// =======================================================
+// Premium Loading Bar (Telegram style)
+// =======================================================
+function startPremiumLoader() {
+    const bar = document.getElementById('loading-bar');
+    const percentText = document.getElementById('loading-percent');
+    const loader = document.getElementById('app-loader');
+    if (!bar || !loader) return;
+
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 11 + 5;
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            bar.style.width = '100%';
+            if (percentText) percentText.innerText = '100%';
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    init(); // লোডিং শেষ হলে অ্যাপ চালু
+                }, 400);
+            }, 250);
+        } else {
+            bar.style.width = progress + '%';
+            if (percentText) percentText.innerText = Math.floor(progress) + '%';
+        }
+    }, 110);
 }
 
-window.addEventListener('DOMContentLoaded', initApp);
+// অ্যাপ লোড হলে লোডিং শুরু
+window.addEventListener('DOMContentLoaded', () => {
+    startPremiumLoader();
+});

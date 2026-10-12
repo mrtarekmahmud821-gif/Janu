@@ -11,12 +11,12 @@ import {
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
-    apiKey: "AIzaSyAD0iYQhYwUWdssGzYFHR9kbP1ZQTlsm80",
-    authDomain: "free-income-app-eeade.firebaseapp.com",
-    projectId: "free-income-app-eeade",
-    storageBucket: "free-income-app-eeade.firebasestorage.app",
-    messagingSenderId: "780467222664",
-    appId: "1:780467222664:web:5f09f8f03833e7b19f873d"
+    apiKey: "AIzaSyDZkV0aOLY-Yiyh5s_Nq_GSz8aiIPoSohc",
+    authDomain: "coin-bazar-f3093.firebaseapp.com",
+    projectId: "coin-bazar-f3093",
+    storageBucket: "coin-bazar-f3093.firebasestorage.app",
+    messagingSenderId: "551875632672",
+    appId: "1:551875632672:web:55bdd11d4654bc4984a645"
 };
 
 const app = initializeApp(firebaseConfig);
